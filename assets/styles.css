@@ -28,17 +28,16 @@ canvas{
 		  text-decoration: none;
 		  outline: none;
 		  color: #fff;
-		  background-color: #006400;
+		  background-color: rgb(68, 136, 204);
 		  border: none;
 		  border-radius: 15px;
-		  box-shadow: 0 9px #4CAF50;
+		  box-shadow: 0 9px rgb(68, 136, 204);
 		}
 		
-.button:hover {background-color: #3e8e41}
+.button:hover {background-color: rgb(68, 143, 204)}
 
 .button:active {
-		  background-color: #3e8e41;
-		  box-shadow: 0 5px black;
+		  background-color: rgb(68, 136, 204);
 		  transform: translateY(4px);
 		}
 		
