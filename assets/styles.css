@@ -1,10 +1,7 @@
 body{
-    font-size: 16px;
-	font-family: Dosis, Roboto, Arial, Verdana, sans-serif;
-	padding: 0;
-	margin: 0;
-	border: 0;
-	background: rgba(128, 200, 255, 0.8);
+    background-image: url('bg_game.png');
+	#background-repeat: no-repeat;
+	margin:0px;
 }
 
 .container{
@@ -13,10 +10,40 @@ body{
 	top:9.5%;
 }
 
+
+.box{
+	background-color:wheat;
+	border: 5px solid black;
+	position: absolute;
+    left: 58.5%;
+    top: 9.5%;
+    width: 300px;
+    height: 555px;
+}
+
+.up-box{
+	margin:5px;
+	border:2px solid green;
+	background-color:#b0ffbe;
+	height:40%;
+    overflow:scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+.down-box{
+	display:flex;
+	align-items:center;
+	#border:2px solid green;
+	background-color:#eedd82;
+	justify-content:space-between;
+	height:12%;
+	margin:5px;
+}
+
 canvas{		
 			border:5px solid black;
 			background:white;	
-			margin:0 10% 0 25%;
+			margin:0 10% 0 40%;
 		}
 
 .button {
@@ -28,19 +55,17 @@ canvas{
 		  text-decoration: none;
 		  outline: none;
 		  color: #fff;
-		  background-color: rgb(68, 136, 204);
+		  background-color: #006400;
 		  border: none;
 		  border-radius: 15px;
-		  box-shadow: 0 9px rgb(68, 136, 204);
+		  box-shadow: 0 9px #4CAF50;
 		}
 		
-.button:hover {background-color: rgb(68, 143, 204)}
+.button:hover {background-color: #3e8e41}
 
 .button:active {
-		  background-color: rgb(68, 136, 204);
+		  background-color: #3e8e41;
+		  box-shadow: 0 5px black;
 		  transform: translateY(4px);
 		}
 		
-#right-box{
-	margin-left:10%;
-}

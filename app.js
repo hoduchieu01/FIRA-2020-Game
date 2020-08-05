@@ -3,20 +3,44 @@ const { reset } = require('nodemon');
 var app = express();
 var serv = require('http').Server(app);
 
+app.engine('html', require('ejs').renderFile);
+
 app.use('/assets',express.static('assets'));
 
 app.get('/',function(req, res){
-	res.sendFile(__dirname + '/index.html');
+	res.sendFile(__dirname + '/home.html');
+});
+
+app.post('/playerlogin',function(req, res){
+	let body = '';
+    req.on('data', chunk => {
+        body += chunk.toString(); // convert Buffer to string
+    });
+    req.on('end', () => {
+		res.render(__dirname + '/player.html', {'name': body.substr(5)});
+	});
+});
+
+app.post('/adminlogin',function(req, res){
+	let body = '';
+    req.on('data', chunk => {
+        body += chunk.toString(); // convert Buffer to string
+    });
+    req.on('end', () => {
+		res.render(__dirname + '/admin.html', {'name': body.substr(5)});
+	});
 });
 
 serv.listen(process.env.PORT);
-console.log("Server is Running on http://localhost:2000 ...");
+//console.log("Server is Running on http://localhost:2000 ...");
+
 
 
 var SOCKET_LIST = {};
 var chance=0;
 var list_socket = [];
 var PLAYER_LIST = {};
+var LOGS = [];
 var TELEPORT = [{'sx':4,'sy':3,'ex':0,'ey':4},{'sx':4,'sy':6,'ex':3,'ey':8},{'sx':8,'sy':2,'ex':5,'ey':5},{'sx':8,'sy':9,'ex':9,'ey':7},{'sx':6,'sy':2,'ex':5,'ey':0},{'sx':1,'sy':0,'ex':9,'ey':3}]
 //Player
 var Player = function(id){
@@ -26,10 +50,13 @@ var Player = function(id){
 		id:id,
 		dice: 0,
 		state: true,
+		name: '',
 		maxSpd: 5,
 		winstatus: -1,
 		previousDice: 0,
-		color: '#' + Math.floor(Math.random()*16777215).toString(16)
+		color: '#' + Math.floor(Math.random()*16777215).toString(16),
+		isadmin: false,
+		score: 0
 	}
 
 //Updating Player Position
@@ -81,7 +108,7 @@ var Player = function(id){
 }
 
 
-
+var single =true;
 
 //Socket Connection
 var io = require('socket.io')(serv,{});
@@ -100,16 +127,39 @@ io.sockets.on('connection',function(socket){
 		delete PLAYER_LIST[socket.id];
 	});
 	
+	socket.on('myname',function(data){
+		PLAYER_LIST[socket.id].name = data['name'];
+	});
+
+	socket.on('iamadmin',function(){
+		//console.log("Hello");
+		PLAYER_LIST[socket.id].isadmin = true;
+	});
+
 	//drice values
 	socket.on('dice', function(data){
 		var chanceDebug = false;
-		if(chanceDebug || list_socket[chance % list_socket.length] != socket){
-			console.log(data,'Dice Received');
-			player.previousDice = data.random;
-			player.dice = data.random*55;
-			chance++;
+		if(player.isadmin){
+			console.log(data,'Admin Dice Received');
+			if(LOGS.length>0 && PLAYER_LIST[LOGS[LOGS.length-1].id] != undefined){
+				single = true;
+				PLAYER_LIST[LOGS[LOGS.length-1].id].previousDice = data.random;
+				PLAYER_LIST[LOGS[LOGS.length-1].id].dice = data.random*55;
+				chance++;
+			}else if(LOGS.length>0){
+				while(PLAYER_LIST[list_socket[chance % list_socket.length].id].isadmin!=false){chance++;console.log("Looping to find player!");}
+			}
+		}else{
+			while(PLAYER_LIST[list_socket[chance % list_socket.length].id].isadmin!=false){chance++;console.log("Looping to find player!");}
+			if(chanceDebug || list_socket[chance % list_socket.length] == socket){
+				console.log(data,'Player Dice Received');
+				if(single){
+				LOGS.push({'id':socket.id,'name':player.name,'dice':data.random,'isadmin':player.isadmin});
+				single = false;
+				}
+			}
 		}
-		//player.dice_value = data.random;
+		
 	});
 
 });
@@ -125,11 +175,12 @@ setInterval(function(){
 		if(player.dice){
 			check = true;
 		}
+
 		player.updatePosition();
 		if(player.winstatus==0){
-			SOCKET_LIST[player.id].emit('win', 'you win the game');
+			SOCKET_LIST[player.id].emit('win', 'Congratulation, You Win!');
 		}
-
+		
 		pack.push({
 			x:player.x,
 			y:player.y-15,
@@ -137,12 +188,16 @@ setInterval(function(){
 			color: player.color,
 			dice_value: player.dice/55,
 			win:player.winstatus,
-			previousDice: player.previousDice
+			previousDice: player.previousDice,
+			isadmin:player.isadmin,
+			score:player.score,
+			name:player.name
 		});
 	}
 	for(var i in SOCKET_LIST){
 		var socket = SOCKET_LIST[i];
 		socket.emit('newPositions',pack);
+		socket.emit('logs',LOGS);
 	}
 	
-},1000/20);
+},1000/30);

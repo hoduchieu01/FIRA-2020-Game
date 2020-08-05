@@ -11,16 +11,16 @@ body{
   text-decoration: none;
   outline: none;
   color: #fff;
-  background-color: rgb(68, 136, 204);
+  background-color: #4CAF50;
   border: none;
   border-radius: 15px;
   box-shadow: 0 9px #999;
 }
 
-.button:hover {background-color: 	rgb(68, 136, 204)}
+.button:hover {background-color: #3e8e41}
 
 .button:active {
-  background-color: rgb(68, 136, 204);
+  background-color: #3e8e41;
   box-shadow: 0 5px #666;
   transform: translateY(4px);
 }
